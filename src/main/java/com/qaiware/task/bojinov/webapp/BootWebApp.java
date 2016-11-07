@@ -21,7 +21,7 @@ import com.qaiware.task.bojinov.webapp.handler.impl.TextRequestHandler;
 public class BootWebApp {
 
 	public static void main(String[] args) {
-	    
+
 		SpringApplication.run(BootWebApp.class, args);
 
 	}
@@ -38,20 +38,20 @@ public class BootWebApp {
 		final IRequestHandler handler = newEmotionRequestHandler();
 		return handler.handle(payload);
 	}
-	
+
 	@RequestMapping(value = "messages", method = RequestMethod.GET)
 	public ResponseEntity<String> postEmotion() {
 		final IRequestHandler handler = newResultRequestHandler();
 		return handler.handle();
 	}
-	
-	
+
+
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	protected ResponseEntity<String> handleError()
 	{
 		return new ResponseEntity<String>(HttpStatus.PRECONDITION_FAILED);
 	}
-	
+
 
 	protected IRequestHandler newTextRequestHandler() {
 		return new TextRequestHandler();
@@ -60,10 +60,10 @@ public class BootWebApp {
 	protected IRequestHandler newEmotionRequestHandler() {
 		return new EmotionRequestHandler();
 	}
-	
+
 	protected IRequestHandler newResultRequestHandler() {
 		return new ResultRequestHandler();
 	}
 
-	
+
 }
