@@ -2,6 +2,8 @@ package com.qaiware.task.bojinov.webapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -11,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qaiware.task.bojinov.webapp.handler.IRequestHandler;
+import com.qaiware.task.bojinov.storage.config.StoreServiceConfig;
+import com.qaiware.task.bojinov.webapp.handler.GetRequestHandler;
+import com.qaiware.task.bojinov.webapp.handler.PostStringRequestHandler;
 import com.qaiware.task.bojinov.webapp.handler.impl.EmotionRequestHandler;
 import com.qaiware.task.bojinov.webapp.handler.impl.ResultRequestHandler;
 import com.qaiware.task.bojinov.webapp.handler.impl.TextRequestHandler;
@@ -20,28 +24,30 @@ import com.qaiware.task.bojinov.webapp.handler.impl.TextRequestHandler;
 @EnableAutoConfiguration
 public class BootWebApp {
 
+	private static final  AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(StoreServiceConfig.class);
 	public static void main(String[] args) {
 
 		SpringApplication.run(BootWebApp.class, args);
+		 
 
 	}
 
 	@RequestMapping(value = "/messages/send_text", method = RequestMethod.POST)
 	public ResponseEntity<String> postText(@RequestBody String payload) {
-		final IRequestHandler handler = newTextRequestHandler();
+		final PostStringRequestHandler handler = newTextRequestHandler();
 		return handler.handle(payload);
 
 	}
 
 	@RequestMapping(value = "messages/send_emotion", method = RequestMethod.POST)
 	public ResponseEntity<String> postEmotion(@RequestBody String payload) {
-		final IRequestHandler handler = newEmotionRequestHandler();
+		final PostStringRequestHandler handler = newEmotionRequestHandler();
 		return handler.handle(payload);
 	}
 
 	@RequestMapping(value = "messages", method = RequestMethod.GET)
 	public ResponseEntity<String> postEmotion() {
-		final IRequestHandler handler = newResultRequestHandler();
+		final GetRequestHandler handler = newResultRequestHandler();
 		return handler.handle();
 	}
 
@@ -53,16 +59,16 @@ public class BootWebApp {
 	}
 
 
-	protected IRequestHandler newTextRequestHandler() {
-		return new TextRequestHandler();
+	protected PostStringRequestHandler newTextRequestHandler() {
+		return new TextRequestHandler(applicationContext);
 	}
 
-	protected IRequestHandler newEmotionRequestHandler() {
-		return new EmotionRequestHandler();
+	protected PostStringRequestHandler newEmotionRequestHandler() {
+		return new EmotionRequestHandler(applicationContext);
 	}
 
-	protected IRequestHandler newResultRequestHandler() {
-		return new ResultRequestHandler();
+	protected GetRequestHandler newResultRequestHandler() {
+		return new ResultRequestHandler(applicationContext);
 	}
 
 

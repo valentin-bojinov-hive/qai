@@ -3,22 +3,31 @@ package com.qaiware.task.bojinov.webapp.handler.impl;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.qaiware.task.bojinov.model.IMessage;
-import com.qaiware.task.bojinov.model.factory.AbstractValidatingMessageFactory;
+import com.qaiware.task.bojinov.storage.IMessageStoreService;
+import com.qaiware.task.bojinov.webapp.handler.GetRequestHandler;
 
-public class ResultRequestHandler extends AbstractRequestHandler {
+public class ResultRequestHandler implements GetRequestHandler {
+	
+	
 
-	@Override
-	protected AbstractValidatingMessageFactory getMessageFactory() {
-		return null;
+	private final AbstractApplicationContext applicationContext;
+
+
+
+	public ResultRequestHandler(AbstractApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 	}
+
+	
 	
 	public ResponseEntity<String> handle()
 	{
-		List<IMessage> messages = getStoreService().getMessages();
+		List<IMessage> messages = applicationContext.getBean(IMessageStoreService.class).getMessages();
 		StringBuilder sb = new StringBuilder();
 		sb.append("Total messages: ").append(messages.size()).append("\n");
 		Iterator<IMessage> iterator = messages.iterator();

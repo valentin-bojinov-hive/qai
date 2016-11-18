@@ -1,8 +1,6 @@
 package com.qaiware.task.bojinov.webapp.handler.impl;
 
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -11,19 +9,25 @@ import com.qaiware.task.bojinov.model.exceptions.InvalidMessageException;
 import com.qaiware.task.bojinov.model.factory.AbstractValidatingMessageFactory;
 import com.qaiware.task.bojinov.storage.IMessageStoreService;
 import com.qaiware.task.bojinov.storage.exceptions.StorageFailureException;
-import com.qaiware.task.bojinov.webapp.handler.IRequestHandler;
+import com.qaiware.task.bojinov.webapp.handler.PostStringRequestHandler;
 
-public abstract class AbstractRequestHandler implements IRequestHandler {
+public abstract class AbstractRequestHandler implements PostStringRequestHandler {
 
-	private static final String STORAGE_SERVICE = "storageService";
-	private static GenericApplicationContext applicationContext;
-	
-	static {
+	/**
+	 * static {
 		 applicationContext = new GenericApplicationContext();
 		 XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(applicationContext);
 		 xmlReader.loadBeanDefinitions(new ClassPathResource("spring/services.xml"));
 		 applicationContext.refresh();
 	}
+	 */
+	
+	private final AbstractApplicationContext applicationContext;
+	
+	AbstractRequestHandler(final AbstractApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+	
 	
 	/**
 	 * Creates a valid Message and stores it to the database if the message is not valid 
@@ -47,22 +51,15 @@ public abstract class AbstractRequestHandler implements IRequestHandler {
 		}
 	
 		return new ResponseEntity<String>(HttpStatus.CREATED);
-	}
+	}	
 	
-	@Override
-	public ResponseEntity<String> handle() {
-		return null;
-	}
 
 	protected IMessageStoreService getStoreService() {
 		
-		return applicationContext.getBean(getStorageServiceBeanName(), IMessageStoreService.class);
+		return applicationContext.getBean(IMessageStoreService.class);
 	}
 	
-	protected String getStorageServiceBeanName()
-	{
-		return STORAGE_SERVICE;
-	}
+	
 
 	protected abstract AbstractValidatingMessageFactory getMessageFactory();
 

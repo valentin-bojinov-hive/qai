@@ -6,13 +6,16 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import com.qaiware.task.bojinov.model.IMessage;
 import com.qaiware.task.bojinov.model.MessageTypesEnum;
-import com.qaiware.task.bojinov.model.factory.impl.EmotionMessageFactory;
+import com.qaiware.task.bojinov.model.factory.AbstractValidatingMessageFactory;
+import com.qaiware.task.bojinov.model.factory.IMessageFactory;
 import com.qaiware.task.bojinov.storage.IMessageStoreService;
+import com.qaiware.task.bojinov.storage.config.TestStoreServiceConfig;
 import com.qaiware.task.bojinov.storage.exceptions.StorageFailureException;
 
 public class EmotionRequestHandlerTest {
@@ -20,16 +23,13 @@ public class EmotionRequestHandlerTest {
 
 	@Before
 	public void setup() {
-		handler = Mockito.mock(EmotionRequestHandler.class);
-		Mockito.when(handler.handle(Mockito.anyString())).thenCallRealMethod();
-		Mockito.when(handler.getMessageFactory()).thenReturn(new EmotionMessageFactory());
-		Mockito.when(handler.getStorageServiceBeanName()).thenReturn("mockStorageService");
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestStoreServiceConfig.class);
+		handler = new EmotionRequestHandler(applicationContext);
 	}
 
 	@Test
 	public void handleTest() {
 
-		Mockito.when(handler.getStoreService()).thenCallRealMethod();
 		handler.getStoreService().clear();
 
 		ResponseEntity<String> response = handler.handle("emotion");
@@ -61,14 +61,17 @@ public class EmotionRequestHandlerTest {
 		IMessageStoreService mockStoreService = Mockito.mock(IMessageStoreService.class);
 		Mockito.doThrow(StorageFailureException.class).when(mockStoreService).store(Mockito.any(IMessage.class));
 		
-		Mockito.when(handler.getStoreService()).thenReturn(mockStoreService);
+		EmotionRequestHandler mockHandler = Mockito.mock(EmotionRequestHandler.class);
+		Mockito.when(mockHandler.handle(Mockito.anyString())).thenCallRealMethod();
+		Mockito.when(mockHandler.getMessageFactory()).thenReturn(Mockito.mock(AbstractValidatingMessageFactory.class));
+		Mockito.when(mockHandler.getStoreService()).thenReturn(mockStoreService);
 		
-		ResponseEntity<String> response = handler.handle("text");
+		ResponseEntity<String> response = mockHandler.handle("text");
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 
-		assertEquals(new Integer(0), new Integer(handler.getStoreService().getMessages(MessageTypesEnum.EMOTION).size()));
+		assertEquals(new Integer(0), new Integer(mockHandler.getStoreService().getMessages(MessageTypesEnum.EMOTION).size()));
 		assertEquals(new Integer(0),
-				new Integer(handler.getStoreService().getMessages(MessageTypesEnum.TEXT).size()));
+				new Integer(mockHandler.getStoreService().getMessages(MessageTypesEnum.TEXT).size()));
 
 	}
 }
