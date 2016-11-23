@@ -6,12 +6,13 @@ import org.springframework.http.ResponseEntity;
 
 import com.qaiware.task.bojinov.model.IMessage;
 import com.qaiware.task.bojinov.model.exceptions.InvalidMessageException;
-import com.qaiware.task.bojinov.model.factory.AbstractValidatingMessageFactory;
+import com.qaiware.task.bojinov.model.exceptions.MessageException;
+import com.qaiware.task.bojinov.model.factory.IMessageFactory;
 import com.qaiware.task.bojinov.storage.IMessageStoreService;
 import com.qaiware.task.bojinov.storage.exceptions.StorageFailureException;
 import com.qaiware.task.bojinov.webapp.handler.PostStringRequestHandler;
 
-public abstract class AbstractRequestHandler implements PostStringRequestHandler {
+public class RequestHandler implements PostStringRequestHandler {
 
 	/**
 	 * static {
@@ -23,9 +24,11 @@ public abstract class AbstractRequestHandler implements PostStringRequestHandler
 	 */
 	
 	private final AbstractApplicationContext applicationContext;
+	private final IMessageFactory messageFactory;
 	
-	AbstractRequestHandler(final AbstractApplicationContext applicationContext) {
+	public RequestHandler(final AbstractApplicationContext applicationContext, final IMessageFactory messageFactory) {
 		this.applicationContext = applicationContext;
+		this.messageFactory = messageFactory;
 	}
 	
 	
@@ -44,7 +47,10 @@ public abstract class AbstractRequestHandler implements PostStringRequestHandler
 			
 		} catch (InvalidMessageException e) {
 			return new ResponseEntity<String>(HttpStatus.PRECONDITION_FAILED);
+		} catch (MessageException e) {
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
+		
 		catch (StorageFailureException e)
 		{
 			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -61,6 +67,8 @@ public abstract class AbstractRequestHandler implements PostStringRequestHandler
 	
 	
 
-	protected abstract AbstractValidatingMessageFactory getMessageFactory();
+	protected IMessageFactory getMessageFactory() {
+		 return messageFactory;
+	}
 
 }

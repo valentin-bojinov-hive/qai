@@ -3,7 +3,6 @@ package com.qaiware.task.bojinov.webapp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,12 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qaiware.task.bojinov.model.factory.impl.EmotionMessageFactory;
+import com.qaiware.task.bojinov.model.factory.impl.TextMessageFactory;
 import com.qaiware.task.bojinov.storage.config.StoreServiceConfig;
 import com.qaiware.task.bojinov.webapp.handler.GetRequestHandler;
 import com.qaiware.task.bojinov.webapp.handler.PostStringRequestHandler;
-import com.qaiware.task.bojinov.webapp.handler.impl.EmotionRequestHandler;
+import com.qaiware.task.bojinov.webapp.handler.impl.RequestHandler;
 import com.qaiware.task.bojinov.webapp.handler.impl.ResultRequestHandler;
-import com.qaiware.task.bojinov.webapp.handler.impl.TextRequestHandler;
 
 @RestController
 @EnableAutoConfiguration
@@ -60,11 +60,11 @@ public class BootWebApp {
 
 
 	protected PostStringRequestHandler newTextRequestHandler() {
-		return new TextRequestHandler(applicationContext);
+		return new RequestHandler(applicationContext, new TextMessageFactory());
 	}
 
 	protected PostStringRequestHandler newEmotionRequestHandler() {
-		return new EmotionRequestHandler(applicationContext);
+		return new RequestHandler(applicationContext, new EmotionMessageFactory());
 	}
 
 	protected GetRequestHandler newResultRequestHandler() {

@@ -13,18 +13,19 @@ import org.springframework.http.ResponseEntity;
 import com.qaiware.task.bojinov.model.IMessage;
 import com.qaiware.task.bojinov.model.MessageTypesEnum;
 import com.qaiware.task.bojinov.model.factory.AbstractValidatingMessageFactory;
+import com.qaiware.task.bojinov.model.factory.impl.TextMessageFactory;
 import com.qaiware.task.bojinov.storage.IMessageStoreService;
 import com.qaiware.task.bojinov.storage.config.TestStoreServiceConfig;
 import com.qaiware.task.bojinov.storage.exceptions.StorageFailureException;
 
 public class TextRequestHandlerTest {
 
-	private TextRequestHandler handler;
+	private RequestHandler handler;
 
 	@Before
 	public void setup() {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestStoreServiceConfig.class);
-		handler = new TextRequestHandler(applicationContext);
+		handler = new RequestHandler(applicationContext, new TextMessageFactory());
 	}
 
 	@Test
@@ -63,7 +64,7 @@ public class TextRequestHandlerTest {
 		IMessageStoreService mockStoreService = Mockito.mock(IMessageStoreService.class);
 		Mockito.doThrow(StorageFailureException.class).when(mockStoreService).store(Mockito.any(IMessage.class));
 		
-		EmotionRequestHandler mockHandler = Mockito.mock(EmotionRequestHandler.class);
+		RequestHandler mockHandler = Mockito.mock(RequestHandler.class);
 		Mockito.when(mockHandler.handle(Mockito.anyString())).thenCallRealMethod();
 		Mockito.when(mockHandler.getMessageFactory()).thenReturn(Mockito.mock(AbstractValidatingMessageFactory.class));
 

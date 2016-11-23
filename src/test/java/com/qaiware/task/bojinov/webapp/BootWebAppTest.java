@@ -1,6 +1,6 @@
 package com.qaiware.task.bojinov.webapp;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,9 +9,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.qaiware.task.bojinov.model.factory.impl.EmotionMessageFactory;
+import com.qaiware.task.bojinov.model.factory.impl.TextMessageFactory;
 import com.qaiware.task.bojinov.storage.config.TestStoreServiceConfig;
-import com.qaiware.task.bojinov.webapp.handler.impl.EmotionRequestHandler;
-import com.qaiware.task.bojinov.webapp.handler.impl.TextRequestHandler;
+import com.qaiware.task.bojinov.webapp.handler.impl.RequestHandler;
 
 public class BootWebAppTest {
 	private BootWebApp app;
@@ -22,8 +23,8 @@ public class BootWebAppTest {
 		app = Mockito.mock(BootWebApp.class);
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestStoreServiceConfig.class);
 		
-		Mockito.when(app.newTextRequestHandler()).thenReturn(new TextRequestHandler(context));
-		Mockito.when(app.newEmotionRequestHandler()).thenReturn(new EmotionRequestHandler(context));
+		Mockito.when(app.newTextRequestHandler()).thenReturn(new RequestHandler(context, new TextMessageFactory()));
+		Mockito.when(app.newEmotionRequestHandler()).thenReturn(new RequestHandler(context, new EmotionMessageFactory()));
 		
 		Mockito.when(app.postEmotion(Mockito.anyString())).thenCallRealMethod();
 		Mockito.when(app.postText(Mockito.anyString())).thenCallRealMethod();
